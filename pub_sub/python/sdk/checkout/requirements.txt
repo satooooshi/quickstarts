@@ -1,0 +1,6 @@
+Flask
+dapr
+cloudevents
+uvicorn
+requests
+fastapi

@@ -1,0 +1,19 @@
+version: '3'
+services:
+  redis:
+    image: "redis:latest"
+    container_name: redis_test #下記のコマンド時に使用するコンテナ名
+    ports:
+      - "6380:6379" #redis containerのデフォルトのポートは6379 (localhostPort:inContainerPort)
+    volumes:
+      - "./data/redis:/data"
+  order-processor:
+    build:
+      context: ./order-processor
+    image: "superheatedboy/order-processor:latest"
+    container_name: redis_test #下記のコマンド時に使用するコンテナ名
+    ports:
+      - "5003:5000" #redis containerのデフォルトのポートは6379
+
+# https://qiita.com/masataka715/items/abfd4b870024cbcebda7
+# docker-compose up
