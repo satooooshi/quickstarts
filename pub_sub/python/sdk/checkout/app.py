@@ -77,7 +77,7 @@ def index():
 
 # https://qiita.com/5zm/items/c8384aa7b7aae924135c
 @app.route('/checkout/<string:catalogId>/<int:amount>')
-def index(catalogId, amount):
+def checkout(catalogId, amount):
     order = {
         'orderId': 111,
         'catalog':{
