@@ -3,5 +3,5 @@ RUN pip install --upgrade pip
 COPY . /app
 WORKDIR /app
 RUN pip install flask flask_cors dapr cloudevents uvicorn requests
-EXPOSE 5001
+EXPOSE 5002
 CMD ["python", "app.py"]

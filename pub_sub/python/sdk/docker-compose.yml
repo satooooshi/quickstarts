@@ -11,9 +11,23 @@ services:
     build:
       context: ./order-processor
     image: "superheatedboy/order-processor:latest"
-    container_name: redis_test #下記のコマンド時に使用するコンテナ名
+    container_name: order-processor
     ports:
-      - "5003:5000" #redis containerのデフォルトのポートは6379
+      - "5001:5001" 
+  customer:
+    build:
+      context: ./customer
+    image: "superheatedboy/customer:latest"
+    container_name: customer
+    ports:
+      - "5002:5001" 
+  checkout:
+    build:
+      context: ./checkout
+    image: "superheatedboy/checkout:latest"
+    container_name: checkout
+    ports:
+      - "5003:5003" 
 
 # https://qiita.com/masataka715/items/abfd4b870024cbcebda7
 # docker-compose up

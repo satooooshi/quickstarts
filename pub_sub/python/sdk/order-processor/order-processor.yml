@@ -16,11 +16,11 @@ spec:
       annotations:
         dapr.io/enabled: "true"
         dapr.io/app-id: "order-processor"
-        dapr.io/app-port: "5000"
+        dapr.io/app-port: "5001"
     spec:
       containers:
       - name: order-processor
         image: superheatedboy/order-processor:latest
         ports:
-        - containerPort: 5000
+        - containerPort: 5001
         imagePullPolicy: Always
