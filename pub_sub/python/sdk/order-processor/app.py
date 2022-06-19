@@ -137,7 +137,7 @@ def started_order_subscriber():
         'ContentType': 'application/json'}
 
 
-app.run(port=5001)
+app.run(host='0.0.0.0', port=5001)
 
 # https://docs.dapr.io/getting-started/quickstarts/pubsub-quickstart/
 

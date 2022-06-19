@@ -154,7 +154,7 @@ def granted_payment_subscriber():
         'ContentType': 'application/json'}
 
 
-app.run(port=5003)
+app.run(host='0.0.0.0', port=5003)
 
 # dapr run --app-id checkout --components-path ../../../components/ --app-port 5003 -- python3 app.py
 # http://localhost:5003/checkout/hello/3
