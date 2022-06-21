@@ -101,4 +101,4 @@ order-processor
 dapr run --app-id order-processor --components-path ../../../components/ --app-port 5001 -- python3 app.py
 
 customer
-dapr run --app-id order-processor --components-path ../../../components/ --app-port 5002 -- python3 customer.py
+dapr run --app-id customer --components-path ../../../components/ --app-port 5002 -- python3 app.py
