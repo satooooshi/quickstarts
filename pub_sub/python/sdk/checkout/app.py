@@ -17,7 +17,7 @@ from fastapi import FastAPI
 
 
 
-#logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 
 #base_url = os.getenv('BASE_URL', 'http://localhost') + ':' + os.getenv('DAPR_HTTP_PORT', '3500')
@@ -185,11 +185,12 @@ def granted_payment_subscriber():
       'value': order
     }
     #logging.info('Order completed: %s %s | %s', state['value']['placeAt'], state['value']['completeAt'],  state['value']['completeAt']- state['value']['placeAt'])
-    logging.info('Order completed: TAT %s', state['value']['completeAt']-state['value']['placeAt'])
+    #logging.info('Order completed: TAT %s', state['value']['completeAt']-state['value']['placeAt'])
+    logging.info("arriveAt: ", state['value']['arriveAt'], ",  completeAt: ", state['value']['completeAt'])
     with open('perftest.log', 'a') as f:
-        print(state['value']['completeAt']-state['value']['placeAt'], file=f)
+        print(state['value']['completeAt']-state['value']['arriveAt'], file=f)
     
-    logging.info("placeAt: ", state['value']['placeAt'], ",  completeAt: ", state['value']['completeAt'])
+    #logging.info("placeAt: ", state['value']['placeAt'], ",  completeAt: ", state['value']['completeAt'])
 
     # Save state into a state store
     result = requests.post(
