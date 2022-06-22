@@ -159,7 +159,7 @@ def checkoutTest(catalogId, amount, customerId, placeAtMs):
 
     #logging.info('Published data: ' + json.dumps(order))
     time.sleep(1)
-    return 'Order started: catalgId: %s, amount: %d, placeAt: %f' % (catalogId, amount, placeAt)
+    return 'Order started: catalgId: %s, amount: %d, placeAtMs: %f' % (catalogId, amount, placeAtMs)
 
 
 # FastAPI
