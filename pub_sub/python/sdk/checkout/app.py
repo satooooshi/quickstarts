@@ -103,8 +103,8 @@ def checkout(catalogId, amount, customerId):
             'total':'',
         },
         'processedEvent':'',
-        'placeAt':time.time(),
-        'arriveAt':time.time(),
+        'placeAt':time.time()*1000,
+        'arriveAt':time.time()*1000,
         'completeAt':''
     }
 
@@ -125,8 +125,10 @@ def checkout(catalogId, amount, customerId):
 
 
 # https://qiita.com/5zm/items/c8384aa7b7aae924135c
-@app.route('/checkout/<string:catalogId>/<int:amount>/<string:customerId>/<float:placeAt>')
-def checkoutTest(catalogId, amount, customerId, placeAt):
+# https://python.civic-apps.com/unixtime-now/
+# ミリ秒で欲しいときは1000倍
+@app.route('/checkout/<string:catalogId>/<int:amount>/<string:customerId>/<int:placeAtMs>')
+def checkoutTest(catalogId, amount, customerId, placeAtMs):
     order = {
         'orderId': str(uuid.uuid4()),
         'catalog':{
@@ -140,8 +142,8 @@ def checkoutTest(catalogId, amount, customerId, placeAt):
             'total':'',
         },
         'processedEvent':'',
-        'placeAt':placeAt,
-        'arriveAt':time.time(),
+        'placeAt':placeAtMs,
+        'arriveAt':time.time()*1000, # ミリ秒で欲しいときは1000倍
         'completeAt':''
     }
 
@@ -177,7 +179,7 @@ def granted_payment_subscriber():
     order = event.data
     # https://note.nkmk.me/python-datetime-timedelta-measure-time/#:~:text=time.time()%20%E3%82%92%E5%88%A9%E7%94%A8,%E7%A7%92%E6%95%B0%E3%81%8C%E6%B1%82%E3%82%81%E3%82%89%E3%82%8C%E3%82%8B%E3%80%82
     # datetime
-    order['completeAt']=time.time()
+    order['completeAt']=time.time()*1000
     state = {
       'key': orderId,
       'value': order
@@ -186,6 +188,8 @@ def granted_payment_subscriber():
     logging.info('Order completed: TAT %s', state['value']['completeAt']-state['value']['placeAt'])
     with open('perftest.log', 'a') as f:
         print(state['value']['completeAt']-state['value']['placeAt'], file=f)
+    
+    print("placeAt: ", state['value']['placeAt'], ",  completeAt: ", state['value']['completeAt'])
 
     # Save state into a state store
     result = requests.post(
