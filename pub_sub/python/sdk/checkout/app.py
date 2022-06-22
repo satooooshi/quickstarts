@@ -189,7 +189,7 @@ def granted_payment_subscriber():
     with open('perftest.log', 'a') as f:
         print(state['value']['completeAt']-state['value']['placeAt'], file=f)
     
-    print("placeAt: ", state['value']['placeAt'], ",  completeAt: ", state['value']['completeAt'])
+    logging.info("placeAt: ", state['value']['placeAt'], ",  completeAt: ", state['value']['completeAt'])
 
     # Save state into a state store
     result = requests.post(
