@@ -186,7 +186,7 @@ def granted_payment_subscriber():
     }
     #logging.info('Order completed: %s %s | %s', state['value']['placeAt'], state['value']['completeAt'],  state['value']['completeAt']- state['value']['placeAt'])
     #logging.info('Order completed: TAT %s', state['value']['completeAt']-state['value']['placeAt'])
-    logging.info("arriveAt: ", state['value']['arriveAt'], ",  completeAt: ", state['value']['completeAt'])
+    logging.info("arriveAt: %s  completeAt: %s", state['value']['arriveAt'], state['value']['completeAt'])
     with open('perftest.log', 'a') as f:
         print(state['value']['completeAt']-state['value']['arriveAt'], file=f)
     
