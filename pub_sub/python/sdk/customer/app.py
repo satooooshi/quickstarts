@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from cloudevents.http import from_http
 import json
+from flask_cors import CORS
 
 import time
 import logging
@@ -17,6 +18,10 @@ base_url = 'http://localhost:3500'
 DAPR_STATE_STORE = 'statestore'
 
 app = Flask(__name__)
+CORS(
+    app,
+    supports_credentials=True
+)
 
 @app.route('/')
 def index():

@@ -4,6 +4,7 @@ import json
 import time
 import logging
 import uuid
+from flask_cors import CORS
 
 from flask import Flask, request, jsonify
 from cloudevents.http import from_http
@@ -25,6 +26,10 @@ base_url = 'http://localhost:3500'
 DAPR_STATE_STORE = 'statestore'
 
 app = Flask(__name__)
+CORS(
+    app,
+    supports_credentials=True
+)
 
 
 # Register Dapr pub/sub subscriptions
