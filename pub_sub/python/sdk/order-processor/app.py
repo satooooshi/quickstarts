@@ -14,8 +14,8 @@ from dapr.clients import DaprClient
 
 logging.basicConfig(level=logging.INFO)
 
-base_url = os.getenv('BASE_URL', 'http://localhost') + ':' + os.getenv('DAPR_HTTP_PORT', '3500')
-#base_url = 'http://localhost:3500'
+#base_url = os.getenv('BASE_URL', 'http://localhost') + ':' + os.getenv('DAPR_HTTP_PORT', '3500')
+base_url = 'http://localhost:3500'
 DAPR_STATE_STORE = 'statestore'
 
 app = Flask(__name__)
