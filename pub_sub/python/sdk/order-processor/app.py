@@ -60,6 +60,27 @@ def add_catalog(catalogId, price, stock, name):
 
     return 'Catalog added: catalogId: %s, price: %d, stock: %d, name: %s' % (catalogId, price, stock, name)
 
+
+
+# https://qiita.com/5zm/items/c8384aa7b7aae924135c
+@app.route('/getAllCatalog', methods=['GET'])
+def get_catalog():
+
+    data = {
+          "keys": [ "111", "222" ]
+      }
+    ## state store should be different from subpub redis instance!!
+    # Save state into a state store, state has to be array!!
+    result = requests.post(
+        url='%s/v1.0/state/%s/bulk' % (base_url, DAPR_STATE_STORE),
+        json=data
+    )
+    logging.info('Getting All Catalog: %s', result.json())
+
+    return jsonify(result.json()), 200
+
+
+
 # Register Dapr pub/sub subscriptions
 @app.route('/dapr/subscribe', methods=['GET'])
 def subscribe():
