@@ -2,6 +2,7 @@ from gettext import Catalog
 from flask import Flask, request, jsonify
 from cloudevents.http import from_http
 import json
+from flask_cors import CORS
 
 import time
 import logging
@@ -13,11 +14,15 @@ from dapr.clients import DaprClient
 
 logging.basicConfig(level=logging.INFO)
 
-#base_url = os.getenv('BASE_URL', 'http://localhost') + ':' + os.getenv('DAPR_HTTP_PORT', '3500')
-base_url = 'http://localhost:3500'
+base_url = os.getenv('BASE_URL', 'http://localhost') + ':' + os.getenv('DAPR_HTTP_PORT', '3500')
+#base_url = 'http://localhost:3500'
 DAPR_STATE_STORE = 'statestore'
 
 app = Flask(__name__)
+CORS(
+    app,
+    supports_credentials=True
+)
 
 @app.route('/')
 def index():

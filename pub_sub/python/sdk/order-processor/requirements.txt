@@ -3,3 +3,4 @@ dapr
 cloudevents
 uvicorn
 requests
+flask_cors
