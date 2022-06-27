@@ -13,8 +13,8 @@ from dapr.clients import DaprClient
 
 logging.basicConfig(level=logging.INFO)
 
-#base_url = os.getenv('BASE_URL', 'http://localhost') + ':' + os.getenv('DAPR_HTTP_PORT', '3500')
-base_url = 'http://localhost:3500'
+base_url = os.getenv('BASE_URL', 'http://localhost') + ':' + os.getenv('DAPR_HTTP_PORT', '3500')
+#base_url = 'http://localhost:3500'
 DAPR_STATE_STORE = 'statestore'
 
 app = Flask(__name__)
@@ -27,12 +27,13 @@ CORS(
 def index():
     return 'Customer service / Asynchronous pubsub implementation.'
 
-@app.route('/customer/<string:customerId>/<int:balance>/<string:name>')
-def add_customer(customerId, balance,  name):
+@app.route('/customer/<string:customerId>/<int:balance>/<string:email>/<string:password>')
+def add_customer(customerId, balance, email, password):
     customer = {
             'customerId':customerId,
             'balance':balance,
-            'name':name,
+            'email':email,
+            'password':password,
         }
     state = [{
       'key': customerId,
@@ -44,8 +45,31 @@ def add_customer(customerId, balance,  name):
         url='%s/v1.0/state/%s' % (base_url, DAPR_STATE_STORE),
         json=state
     )
-    logging.info('Saving Catalog: %s', state)
-    return 'Customer added: customerId: %s, balance: %d, name: %s' % (customerId, balance, name)
+    logging.info('Saving Customer: %s', result.status_code)
+    result = requests.get(
+        url='%s/v1.0/state/%s/%s' % (base_url, DAPR_STATE_STORE, customerId)
+    )
+    logging.info('Getting Customer result: ' + str(result.json()))
+    return jsonify(result.json()),200#'Customer added: customerId: %s, balance: %d, email: %s, password: %s' % (customerId, balance, email, password)
+
+
+
+# https://qiita.com/5zm/items/c8384aa7b7aae924135c
+# https://docs.dapr.io/developing-applications/building-blocks/state-management/howto-state-query-api/
+@app.route('/customer/<string:email>/<string:password>', methods=['GET'])
+def get_customer(email, password):
+
+    result = requests.get(
+        url='%s/v1.0/state/%s/%s' % (base_url, DAPR_STATE_STORE, email)
+    )
+
+
+    logging.info(result.json())
+    #logging.info('Getting Customer: %s', str(result.json()))
+
+    return jsonify(result.json()), 200
+
+
 
 # Register Dapr pub/sub subscriptions
 @app.route('/dapr/subscribe', methods=['GET'])
@@ -147,10 +171,30 @@ def consumed_catalog_subscriber():
     return json.dumps({'success': True}), 200, {
         'ContentType': 'application/json'}
 
-app.run(host='0.0.0.0', port=5002)
-#app.run( port=5002)
+#app.run(host='0.0.0.0', port=5002)
+app.run( port=5002)
 
 # https://docs.dapr.io/getting-started/quickstarts/pubsub-quickstart/
 
 
 
+
+'''
+    ## state store should be different from subpub redis instance!!
+    result = requests.post(
+        url='%s/v1.0-alpha1/state/%s/query' % (base_url, DAPR_STATE_STORE),
+        json=data
+    )
+    data = {
+    "filter": {
+        "AND": [
+            {
+                "EQ": { "email": email }
+            },
+            {
+                "EQ": { "password": password }
+            },        
+        ]
+    },
+    }
+'''

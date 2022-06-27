@@ -21,8 +21,8 @@ from fastapi import FastAPI
 logging.basicConfig(level=logging.INFO)
 
 
-#base_url = os.getenv('BASE_URL', 'http://localhost') + ':' + os.getenv('DAPR_HTTP_PORT', '3500')
-base_url = 'http://localhost:3500'
+base_url = os.getenv('BASE_URL', 'http://localhost') + ':' + os.getenv('DAPR_HTTP_PORT', '3500')
+#base_url = 'http://localhost:3500'
 DAPR_STATE_STORE = 'statestore'
 
 app = Flask(__name__)
@@ -31,6 +31,7 @@ CORS(
     supports_credentials=True
 )
 
+logging.info('baseurl: ' + base_url)
 
 # Register Dapr pub/sub subscriptions
 @app.route('/dapr/subscribe', methods=['GET'])
@@ -95,8 +96,9 @@ def index():
 # https://qiita.com/5zm/items/c8384aa7b7aae924135c
 @app.route('/checkout/<string:catalogId>/<int:amount>/<string:customerId>')
 def checkout(catalogId, amount, customerId):
+    orderId= 'ord_'+customerId
     order = {
-        'orderId': str(uuid.uuid4()),
+        'orderId':orderId, #str(uuid.uuid4()),
         'catalog':{
             'catalogId':catalogId,
             'amount':amount,
@@ -107,11 +109,21 @@ def checkout(catalogId, amount, customerId):
             'customerId':customerId,
             'total':'',
         },
-        'processedEvent':'',
+        'processedEvent':'order-accepted',
         'placeAt':time.time()*1000,
         'arriveAt':time.time()*1000,
         'completeAt':''
     }
+
+    state = {
+      'key': orderId,
+      'value': order
+    }
+
+    result = requests.post(
+        url='%s/v1.0/state/%s' % (base_url, DAPR_STATE_STORE),
+        json=state
+    )
 
     with DaprClient() as client:
         # Publish an event/message using Dapr PubSub
@@ -124,8 +136,7 @@ def checkout(catalogId, amount, customerId):
         )
 
     #logging.info('Published data: ' + json.dumps(order))
-    time.sleep(1)
-    return 'Order started: catalgId: %s, amount: %d, customerId %s' % (catalogId, amount, customerId)
+    return jsonify(order), 200#'Order started: catalgId: %s, amount: %d, customerId %s' % (catalogId, amount, customerId)
 
 
 
@@ -135,7 +146,7 @@ def checkout(catalogId, amount, customerId):
 @app.route('/checkout/<string:catalogId>/<int:amount>/<string:customerId>/<int:placeAtMs>')
 def checkoutTest(catalogId, amount, customerId, placeAtMs):
     order = {
-        'orderId': str(uuid.uuid4()),
+        'orderId':  'ord_'+customerId, #str(uuid.uuid4()),
         'catalog':{
             'catalogId':catalogId,
             'amount':amount,
@@ -146,7 +157,7 @@ def checkoutTest(catalogId, amount, customerId, placeAtMs):
             'customerId':customerId,
             'total':'',
         },
-        'processedEvent':'',
+        'processedEvent':'order-accepted',
         'placeAt':placeAtMs,
         'arriveAt':time.time()*1000, # ミリ秒で欲しいときは1000倍
         'completeAt':''
@@ -164,7 +175,20 @@ def checkoutTest(catalogId, amount, customerId, placeAtMs):
 
     #logging.info('Published data: ' + json.dumps(order))
     time.sleep(1)
-    return 'Order started: catalgId: %s, amount: %d, placeAtMs: %f' % (catalogId, amount, placeAtMs)
+    return jsonify(order), 200#'Order started: catalgId: %s, amount: %d, placeAtMs: %f' % (catalogId, amount, placeAtMs)
+
+
+# https://qiita.com/5zm/items/c8384aa7b7aae924135c
+@app.route('/order/<string:customerId>')
+def get_order(customerId):
+    orderId = 'ord_'+customerId
+    result = requests.get(
+        url='%s/v1.0/state/%s/%s' % (base_url, DAPR_STATE_STORE, orderId)
+    )
+    order=result.json()
+    logging.info('get_order of customerId: %s: %s', customerId, str(result.json()))
+    return jsonify(order), 200#'Order started: catalgId: %s, amount: %d, customerId %s' % (catalogId, amount, customerId)
+
 
 
 # FastAPI
@@ -185,40 +209,31 @@ def granted_payment_subscriber():
     # https://note.nkmk.me/python-datetime-timedelta-measure-time/#:~:text=time.time()%20%E3%82%92%E5%88%A9%E7%94%A8,%E7%A7%92%E6%95%B0%E3%81%8C%E6%B1%82%E3%82%81%E3%82%89%E3%82%8C%E3%82%8B%E3%80%82
     # datetime
     order['completeAt']=time.time()*1000
-    state = {
+    order['processedEvent']='Order-Success'
+    state = [{
       'key': orderId,
       'value': order
-    }
+    }]
     #logging.info('Order completed: %s %s | %s', state['value']['placeAt'], state['value']['completeAt'],  state['value']['completeAt']- state['value']['placeAt'])
     #logging.info('Order completed: TAT %s', state['value']['completeAt']-state['value']['placeAt'])
-    logging.info("arriveAt: %s  completeAt: %s", state['value']['arriveAt'], state['value']['completeAt'])
+    logging.info("arriveAt: %s  completeAt: %s", state[0]['value']['arriveAt'], state[0]['value']['completeAt'])
     with open('perftest.log', 'a') as f:
-        print(state['value']['completeAt']-state['value']['arriveAt'], file=f)
+        print(state[0]['value']['completeAt']-state[0]['value']['arriveAt'], file=f)
     
-    #logging.info("placeAt: ", state['value']['placeAt'], ",  completeAt: ", state['value']['completeAt'])
+    #logging.info("placeAt: ", state[0]['value']['placeAt'], ",  completeAt: ", state[0]['value']['completeAt'])
 
     # Save state into a state store
     result = requests.post(
         url='%s/v1.0/state/%s' % (base_url, DAPR_STATE_STORE),
         json=state
     )
-    #logging.info('Saving Order: %s', state)
+    logging.info('Saving granted-payment order: %s', result.status_code)
 
     # Get state from a state store
     result = requests.get(
         url='%s/v1.0/state/%s/%s' % (base_url, DAPR_STATE_STORE, orderId)
     )
-    #logging.info('Getting Order: ' + str(result.json()))
-
-    # Delete state from the state store
-    result = requests.delete(
-        url='%s/v1.0/state/%s' % (base_url, DAPR_STATE_STORE),
-        json=state
-    )
-    #logging.info('Deleted Order: %s', state)
-    ##
-
-
+    logging.info('Getting granted-payment Order: %s', str(result.json()))
 
     # 200 indicates subscriber successfully got data
     return json.dumps({'success': True}), 200, {

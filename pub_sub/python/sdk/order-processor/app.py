@@ -14,8 +14,8 @@ from dapr.clients import DaprClient
 
 logging.basicConfig(level=logging.INFO)
 
-#base_url = os.getenv('BASE_URL', 'http://localhost') + ':' + os.getenv('DAPR_HTTP_PORT', '3500')
-base_url = 'http://localhost:3500'
+base_url = os.getenv('BASE_URL', 'http://localhost') + ':' + os.getenv('DAPR_HTTP_PORT', '3500')
+#base_url = 'http://localhost:3500'
 DAPR_STATE_STORE = 'statestore'
 
 app = Flask(__name__)
@@ -47,13 +47,13 @@ def add_catalog(catalogId, price, stock, name):
         url='%s/v1.0/state/%s' % (base_url, DAPR_STATE_STORE),
         json=state
     )
-    logging.info('Saving Catalog: %s', state)
+    logging.info('Saving Catalog status_code: %s', result.status_code)
 
     # Get state from a state store
     result = requests.get(
         url='%s/v1.0/state/%s/%s' % (base_url, DAPR_STATE_STORE, catalogId)
     )
-    logging.info('Getting Catalog: ' + str(result.json()))
+    logging.info('Getting Catalog result: ' + str(result.json()))
 
     # Delete state from the state store
     #result = requests.delete(
@@ -63,7 +63,7 @@ def add_catalog(catalogId, price, stock, name):
     #logging.info('Deleted Catalog: %s', state)
     ##
 
-    return 'Catalog added: catalogId: %s, price: %d, stock: %d, name: %s' % (catalogId, price, stock, name)
+    return  jsonify(result.json()),200#'Catalog added: catalogId: %s, price: %d, stock: %d, name: %s' % (catalogId, price, stock, name)
 
 
 
