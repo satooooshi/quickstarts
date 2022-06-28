@@ -28,6 +28,13 @@ services:
     container_name: checkout
     ports:
       - "5003:5003" 
+  detail:
+    build:
+      context: ./detail
+    image: "superheatedboy/detail:latest"
+    container_name: detail
+    ports:
+      - "3006:3006" 
 
 # https://qiita.com/masataka715/items/abfd4b870024cbcebda7
 # docker-compose up
