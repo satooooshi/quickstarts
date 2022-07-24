@@ -171,8 +171,8 @@ def consumed_catalog_subscriber():
     return json.dumps({'success': True}), 200, {
         'ContentType': 'application/json'}
 
-#app.run(host='0.0.0.0', port=5002)
-app.run( port=5002)
+app.run(host='0.0.0.0', port=5002)
+#app.run( port=5002)
 
 # https://docs.dapr.io/getting-started/quickstarts/pubsub-quickstart/
 
